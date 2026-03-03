@@ -1,28 +1,48 @@
 FROM archlinux AS builder
 
+# from 
 COPY bash-5.3.tar.gz /opt 
 RUN cd /opt && tar xzf /opt/bash-5.3.tar.gz 
 
 WORKDIR /opt/bash-5.3
 
 RUN yes | pacman -Syu gcc mandoc make groff
+# RUN yes | pacman -Syu gcc mandoc make groff pkg-config
 RUN ./configure 
 RUN make 
-RUN mkdir -p /off_path/bin/ && mv /bin/* /off_path/bin/  && /off_path/bin/mv bash /bin/bash && /off_path/bin/ln -s /bin/bash /bin/sh 
+
+# todo watch all dependencies in SBOM for CVE's 
+# from https://mirror.csclub.uwaterloo.ca/gnu/wget/
+# RUN cd /opt && /wget https://mirror.csclub.uwaterloo.ca/gnu/wget/wget-1.9.tar.gz
+# todo - add software version as variable
+COPY wget-1.25.0.tar.gz /opt 
+RUN cd /opt && tar xzf /opt/wget-1.25.0.tar.gz 
+
+RUN yes | pacman -Syu pkg-config
+WORKDIR /opt/wget-1.25.0
+RUN ./configure
+RUN make
+RUN make install 
+
+RUN mkdir -p /off_path/bin/ && mv /bin/* /off_path/bin/ && /off_path/bin/mv /opt/bash-5.3/bash /bin && /off_path/bin/ln -s /bin/bash /bin/sh 
+RUN /off_path/bin/mv /usr/local/bin/wget /bin/wget && /off_path/bin/mv /usr/local/etc/wgetrc /etc/wgetrc 
+
+# && /off_path/bin/mv /opt/wget2-2.2.1/wget /bin/wget 
 
 RUN /off_path/bin/head -1 /etc/passwd | /off_path/bin/sed 's;/usr/bin;;' >> /tmp/passwd
 
 
-FROM scratch
-USER root
-COPY --from=builder /tmp/passwd /etc/passwd 
-COPY --from=builder --chmod=755 /bin/bash /bin/bash 
-COPY --from=builder --chmod=755 /bin/bash /bin/sh
-COPY --from=builder /lib /lib
-COPY --from=builder /usr/lib /usr/lib
-COPY --from=builder /lib64 /lib64
+#FROM scratch AS bash_builder
+#USER root
+#
+#COPY --from=builder /tmp/passwd /etc/passwd 
+#COPY --from=builder --chmod=755 /bin /bin 
+#COPY --from=builder --chmod=755 /lib /lib
+#COPY --from=builder --chmod=755 /usr/lib /usr/lib
+#COPY --from=builder --chmod=755 /lib64 /lib64
+#
+#ENV SHELL=/bin/sh
+#
+#CMD ["/bin/bash", "-l"]
 
-ENV SHELL=/bin/sh
-
-CMD ["/bin/bash", "-l"]
 
