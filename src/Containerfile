@@ -38,6 +38,8 @@ USER root
 COPY --from=builder /tmp/passwd /etc/passwd 
 COPY --from=builder --chmod=755 /bin /bin 
 COPY --from=builder --chmod=644 /etc/wgetrc /etc
+COPY --from=builder /etc/ca-certificates /etc/ca-certificates
+COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 COPY --from=builder --chmod=755 /lib /lib
 COPY --from=builder --chmod=755 /usr/lib /usr/lib
 COPY --from=builder --chmod=755 /lib64 /lib64
