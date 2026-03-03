@@ -18,4 +18,8 @@
 5. head 
 6. sed
 
+## Wanted but not build 
+
+1. id
+2. cd 
 

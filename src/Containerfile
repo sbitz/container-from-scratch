@@ -32,17 +32,18 @@ RUN /off_path/bin/mv /usr/local/bin/wget /bin/wget && /off_path/bin/mv /usr/loca
 RUN /off_path/bin/head -1 /etc/passwd | /off_path/bin/sed 's;/usr/bin;;' >> /tmp/passwd
 
 
-#FROM scratch AS bash_builder
-#USER root
-#
-#COPY --from=builder /tmp/passwd /etc/passwd 
-#COPY --from=builder --chmod=755 /bin /bin 
-#COPY --from=builder --chmod=755 /lib /lib
-#COPY --from=builder --chmod=755 /usr/lib /usr/lib
-#COPY --from=builder --chmod=755 /lib64 /lib64
-#
-#ENV SHELL=/bin/sh
-#
-#CMD ["/bin/bash", "-l"]
+FROM scratch
+USER root
+
+COPY --from=builder /tmp/passwd /etc/passwd 
+COPY --from=builder --chmod=755 /bin /bin 
+COPY --from=builder --chmod=644 /etc/wgetrc /etc
+COPY --from=builder --chmod=755 /lib /lib
+COPY --from=builder --chmod=755 /usr/lib /usr/lib
+COPY --from=builder --chmod=755 /lib64 /lib64
+
+ENV SHELL=/bin/sh
+
+CMD ["/bin/bash", "-l"]
 
 
